@@ -1,0 +1,27 @@
+@import "~bulma/sass/utilities/_all";
+
+$radius-small: 10px;
+$radius: 10px;
+$radius-large: 0;
+
+$primary: #bca480;
+$primary-invert: findColorInvert($primary);
+$twitter: #4099ff;
+$twitter-invert: findColorInvert($twitter);
+
+$dark: #3b3e43;
+$dark-invert: lighten(#bca480, 10%);
+
+body {
+  font-family: "Istok Web", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Montserrat", sans-serif;
+  font-weight: bold;
+}
