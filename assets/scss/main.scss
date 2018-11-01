@@ -4,18 +4,69 @@ $radius-small: 10px;
 $radius: 10px;
 $radius-large: 0;
 
-$primary: #bca480;
+$primary: #f71568;
 $primary-invert: findColorInvert($primary);
-$twitter: #4099ff;
-$twitter-invert: findColorInvert($twitter);
 
-$dark: #3b3e43;
-$dark-invert: lighten(#bca480, 10%);
+$dark: #2f2bad;
+$dark-invert: white; //lighten(#bca480, 10%);
+
+$colors: (
+  "white": (
+    $white,
+    $black
+  ),
+  "black": (
+    $black,
+    $white
+  ),
+  "light": (
+    $light,
+    $light-invert
+  ),
+  "dark": (
+    $dark,
+    $dark-invert
+  ),
+  "primary": (
+    $primary,
+    $primary-invert
+  ),
+  "info": (
+    $info,
+    $info-invert
+  ),
+  "success": (
+    $success,
+    $success-invert
+  ),
+  "warning": (
+    $warning,
+    $warning-invert
+  ),
+  "danger": (
+    $danger,
+    $danger-invert
+  )
+);
+
+$link: $primary;
+$link-invert: $primary-invert;
+$link-focus-border: $primary;
+
+$dropdown-item-active-color: $link-invert;
+$dropdown-item-active-background-color: $link;
+$dropdown-content-offset: 0;
+$dropdown-content-radius: 0;
+
+$input-shadow: none;
+$input-border-color: transparent;
 
 body {
-  font-family: "Istok Web", sans-serif;
+  color: black;
+  font-family: "Open Sans", sans-serif;
 }
 
+.button,
 h1,
 h2,
 h3,
@@ -25,3 +76,10 @@ h6 {
   font-family: "Montserrat", sans-serif;
   font-weight: bold;
 }
+
+@import "~bulma";
+@import "~buefy/src/scss/buefy";
+
+// div {
+// width: 100%;
+// }

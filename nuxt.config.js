@@ -29,6 +29,7 @@ module.exports = {
   plugins: [
     { src: "~/plugins/async-computed.plugin.ts" },
     { src: "~/plugins/bem.plugin.ts" },
+    { src: "~/plugins/buefy.plugin.ts" },
     { src: "~/plugins/charts.plugin.ts", ssr: false }
   ],
   head: {
@@ -66,11 +67,6 @@ module.exports = {
       plugins: ["dynamic-import-node"]
     }
   },
-  modules: [
-    "@nuxtjs/axios",
-    "nuxt-buefy",
-    "@nuxtjs/dotenv",
-    "~/modules/typescript.js"
-  ],
+  modules: ["@nuxtjs/axios", "@nuxtjs/dotenv", "~/modules/typescript.js"],
   axios: {}
 };
