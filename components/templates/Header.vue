@@ -2,7 +2,7 @@
   section(:class='b()')
     div(:class="b('inner')")
       slot
-    div.tile(:class="b('under')")
+    div(:class="b('under')")
       slot(name='under')
 </template>
 
@@ -27,11 +27,10 @@ export default class extends Vue {}
 
   &__under {
     background-color: #2623a0;
-    // padding: 10px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    // flex-wrap: nowrap;
+    padding: 5px;
+    // display: flex;
+    // flex-direction: row;
+    // flex-wrap: wrap;
   }
 }
 </style>
