@@ -27,6 +27,7 @@ module.exports = {
     baseUrl: process.env.BASE_URL || `http://${host}:${port}`
   },
   plugins: [
+    { src: "~/plugins/api" },
     { src: "~/plugins/async-computed.plugin.ts" },
     { src: "~/plugins/bem.plugin.ts" },
     { src: "~/plugins/buefy.plugin.ts" },
