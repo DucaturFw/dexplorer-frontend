@@ -8,6 +8,7 @@
 <script lang="ts">
 import ChainBadge from "~/components/moleculas/ChainBadge.vue";
 import { Component, Vue, Prop, Watch } from "nuxt-property-decorator";
+import { IChainConfig, ChainCode } from "store";
 
 @Component({
   name: "o-chain-select",
@@ -17,22 +18,12 @@ import { Component, Vue, Prop, Watch } from "nuxt-property-decorator";
 })
 export default class extends Vue {
   @Prop({ required: true })
-  chains: Array<{
-    name: string;
-    ticker: string;
-    code: string;
-    icon: string;
-  }>;
+  chains: Array<IChainConfig>;
 
   @Prop({ required: true })
-  value: string;
+  value: ChainCode;
 
-  @Watch("value")
-  emitUpdate(v) {
-    this.$emit("input", v);
-  }
-
-  get selectedChain() {
+  get selectedChain(): IChainConfig {
     return this.chains.filter(chain => chain.code === this.value)[0];
   }
 }
