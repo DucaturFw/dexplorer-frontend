@@ -1,6 +1,5 @@
 <template lang="pug">
   section(:class='b()')
-    span content
     slot
 </template>
 

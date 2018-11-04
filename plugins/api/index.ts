@@ -4,7 +4,7 @@ import axios, { AxiosPromise } from "axios";
 import { IBlock } from "~/store";
 
 export default function(context, inject) {
-  if (!context.isHMR) {
+  if ((<any>process).client && !context.isHMR) {
     inject("connection", new DuxiConnection());
   }
 }
@@ -111,12 +111,22 @@ export class DuxiConnection {
         const blocks: IBlock[] = await Promise.all(
           Array(limit)
             .fill(0)
-            .map((_, index) => to - index)
+            .map((_, index) => to - limit + index + 1)
             .map(height =>
               ethrpc("eth_getBlockByNumber", [
                 "0x" + new bn(height).toString("hex"),
                 true
-              ]).then(response => response.data.result)
+              ]).then(response => ({
+                ...response.data.result,
+                height: new bn(
+                  response.data.result.number.slice(2),
+                  16
+                ).toNumber(),
+                timestamp: new bn(
+                  response.data.result.timestamp.slice(2),
+                  16
+                ).toNumber()
+              }))
             )
         );
         return blocks;
@@ -134,13 +144,24 @@ export class DuxiConnection {
         const blocks: IBlock[] = await Promise.all(
           Array(limit)
             .fill(0)
-            .map((_, index) => to - index)
-            .reverse()
+            .map((_, index) => to - limit + index)
             .map(height =>
-              ethrpc("eth_getBlockByNumber", [
-                "0x" + new bn(height).toString("hex"),
-                true
-              ]).then(response => response.data.result)
+              eosrpc("chain/get_block", {
+                block_num_or_id: height
+              })
+                .then(response => response.data)
+                .then(block => ({
+                  version: 1,
+
+                  author: block.block.producer,
+                  hash: block.block_id,
+                  height: block.block_num,
+                  parentHash: block.block.previous,
+                  timestamp: block.createdAt.getTime() / 1000,
+                  signature: block.block.producer_signature,
+                  transactions: block.block.transactions.map(tx => tx.trx.id),
+                  transactionsRoot: block.block.transaction_mroot
+                }))
             )
         );
         return blocks;
