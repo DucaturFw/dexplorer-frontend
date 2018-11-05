@@ -13,31 +13,38 @@
 
       //- b-field(v-for='col in customColumns')
         b-checkbox(v-model="col.show") {{ col.title }}
-      //- pre {{ latestBlocks[0] }}
+      pre {{ latestBlocks[0] }}
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "nuxt-property-decorator";
 import { State } from "vuex-class";
-import { IBlock } from "store";
+import { IBlock, ChainCode } from "store";
 import DataTableVue, {
   ITableColumn
 } from "~/components/organisms/DataTable.vue";
 
 @Component({
+  name: "l-page",
   components: {
     "o-data-table": DataTableVue
   }
 })
 export default class extends Vue {
+  @State selectedChain: ChainCode;
   @State latestBlocks: IBlock[];
+
+  modificators = {
+    type: "index"
+  };
 
   columns: Array<ITableColumn> = ([
     {
       title: "Height",
       key: "height",
       editor: "value",
-      width: 100
+      width: 100,
+      url: row => `/block/${row.height}`
     },
     {
       title: "Hash",
@@ -47,6 +54,7 @@ export default class extends Vue {
         head: 2,
         tail: 4
       },
+      url: row => `/block/${row.hash}`,
       width: 120
     },
     {

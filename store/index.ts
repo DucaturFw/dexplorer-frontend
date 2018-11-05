@@ -69,6 +69,8 @@ export interface IChainConfig {
 }
 
 export interface IStoreState {
+  now: number;
+
   chains: Array<IChainConfig>;
   selectedChain: ChainCode;
 
@@ -118,6 +120,7 @@ export const state = (): Nullable<IStoreState> => {
     }
   ];
   return {
+    now: 0,
     chains,
     selectedChain: null,
 
@@ -145,6 +148,10 @@ export type Nullable<T> = { [P in keyof T]: T[P] | null };
 export class mutations {
   static selectedChain(state: Nullable<IStoreState>, chain: ChainCode) {
     state.selectedChain = chain;
+  }
+
+  static now(state: Nullable<IStoreState>, now: number) {
+    state.now = now;
   }
 
   static marketCap(state: Nullable<IStoreState>, marketCap: number) {
