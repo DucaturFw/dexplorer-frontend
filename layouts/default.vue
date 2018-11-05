@@ -5,7 +5,8 @@
     link(rel="stylesheet" href="//cdn.materialdesignicons.com/2.0.46/css/materialdesignicons.min.css")
     link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Montserrat:700&amp;subset=cyrillic")
     t-header.has-background-dark.has-text-white-bis(:class="b('header')")
-      m-logotype(:class="b('logotype')")
+      router-link(to='/')
+        m-logotype(:class="b('logotype')")
       o-chain-select(v-if='chains && chains.length && selectedChain' :chains='chains' :value='selectedChain' @input='onSelectedChain' :class="b('chains')")
       o-menu(:class="b('menu')")
       o-search
@@ -15,10 +16,8 @@
             line-chart(:data='tpsChartData' :options='tpsChartOptions' style='position: absolute; left: 0; top: 0; bottom: 0; right: 0;z-index: 1')
           .card-content(style="z-index: 2; position: relative")
             p.title
-              m-value 250
-              span /
-              m-value 4992
-            p.subtitle current/max tps
+              m-value(:value='tps' :decimals='2')
+            p.subtitle Tx/sec
         .card.o-flex__item.o-flex__item--grow
           .card-content
             p.title 
@@ -80,7 +79,8 @@ import {
   StateMutation,
   CommitMutation,
   IChainConfig,
-  ChainCode
+  ChainCode,
+  IBlock
 } from "~/store";
 import { setInterval } from "timers";
 
@@ -111,6 +111,8 @@ export default class extends Vue {
   @State chainHeight: number;
   @State price: number;
   @State marketCap: number;
+  @State latestBlocks: IBlock[];
+  @State now: number;
 
   mempool: number = Math.floor(Math.random() * 4300);
 
@@ -131,14 +133,28 @@ export default class extends Vue {
     );
   }
 
+  get tps() {
+    if (!Array.isArray(this.latestBlocks) || !this.latestBlocks.length) {
+      return 0;
+    }
+    const txCount = this.latestBlocks.reduce(
+      (acc, block) => ((acc += block.transactions.length), acc),
+      0
+    );
+    const from = this.latestBlocks[0].timestamp * 1000;
+    const distance = this.now - from;
+
+    return txCount / distance * 1000;
+  }
+
   get tpsChartData() {
     return {
       labels: Array(7 * 12).fill(0),
       datasets: [
         {
           label: "Transactions",
-          backgroundColor: "rgba(247, 21, 104, 0.15)",
-          borderColor: "rgba(247, 21, 104, 0.15)",
+          backgroundColor: "rgba(41, 125, 251, 0.15)",
+          borderColor: "rgba(41, 125, 251, 0.15)",
           pointRadius: 0,
           cubicInterpolationMode: "monotone",
           borderWidth: 0.1,
