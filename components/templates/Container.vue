@@ -24,6 +24,7 @@ export default class extends Vue {
 
 <style lang="scss">
 .t-container {
+  overflow: hidden;
   padding: 10px;
 }
 </style>
