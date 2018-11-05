@@ -30,16 +30,6 @@ export default class extends Vue {
   $connection: DuxiConnection;
   subscriptions: Subscription[] = [];
 
-  async start() {
-    while (true) {
-      try {
-        await this.$connection.loop();
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  }
-
   @Watch("selectedChain")
   changeChain(chain: ChainCode) {
     this.$connection.watch(chain);
@@ -59,8 +49,6 @@ export default class extends Vue {
       this.$connection.cap.subscribe(this.marketCapChange),
       this.$connection.blocks.subscribe(this.recentBlockReceive)
     ];
-
-    // this.start();
   }
 }
 </script>
