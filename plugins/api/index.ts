@@ -10,7 +10,10 @@ export default function(context, inject) {
     vue.prototype.$connection = context.app.$connection;
 
     console.log("start connection loop");
-    context.app.$connection.loop();
+
+    if ((<any>process).client) {
+      context.app.$connection.loop();
+    }
   }
 }
 
