@@ -10,12 +10,12 @@
       .tile
         t-container.tile.is-child(:padding='30')
           h3.is-size-3 Core
+          o-data-table(:dataset='block' :schema='details')
 
-          dl(v-for="(line, index) in details" :key='index' :class='b("spec")')
-            dt( :class='b("spec-term")') {{ line.title }}
-            dd( :class='b("spec-desc")') {{ block[line.key] }}
         t-container.tile.is-child.has-background-white-ter(:padding='30')
           h3.is-size-3 Ethereum specific
+          o-data-table(:dataset='block' :schema='specific')
+
       t-container.tile.is-child.has-background-white-ter(:padding='30')
         h3.is-size-3 Transactions
 
@@ -29,11 +29,13 @@ import { IBlock } from "store";
 
 import ContainerVue from "~/components/templates/Container.vue";
 import HashVue from "~/components/moleculas/data-table-fields/Hash.vue";
+import DataTableVue from "~/components/organisms/DataTable.vue";
 
 @Component(<any>{
   name: "l-page",
   components: {
     "t-container": ContainerVue,
+    "o-data-table": DataTableVue,
     "m-hash": HashVue
   },
   async asyncData(context) {
@@ -73,6 +75,14 @@ export default class extends Vue {
   test: string = "bar";
 
   mounted() {}
+
+  getByKey(from: any, key: string | ((row: any) => any)) {
+    if (typeof key === "function") {
+      return key(from);
+    } else {
+      return from[key];
+    }
+  }
 
   get isHash() {
     return this.hash.length === 64;
@@ -135,7 +145,12 @@ export default class extends Vue {
         key: "size",
         width: 200,
         show: false
-      },
+      }
+    ];
+  }
+
+  get specific() {
+    return [
       {
         title: "Gas Used",
         key: "gasUsed",

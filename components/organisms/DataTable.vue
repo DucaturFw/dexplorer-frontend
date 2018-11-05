@@ -1,6 +1,6 @@
 <template lang="pug">
   div(:class='b()' v-if='show')
-    b-table(:class='b("table")' :data='dataset')
+    b-table(:class='b("table")' :data='dataset' v-if='isArray')
       <template slot-scope="props" slot="header">
         span(:class='b("header", props.column.meta)') {{ props.column.label }}
         
@@ -13,6 +13,10 @@
           router-link(v-if='col.meta.url' :to='"/" + selectedChain +  col.meta.url(props.row)')
             component(:is='col.meta.editor' v-bind='col.meta.props' :value='getData(props.row, col.field, col.meta)' :class='b("field", col.meta )')
           component(v-else :is='col.meta.editor' v-bind='col.meta.props' :value='getData(props.row, col.field, col.meta)' :class='b("field", col.meta )')
+    div(:class='b("list")')
+      dl(v-for="(col, index) in columns" :key='index' :class='b("spec")')
+        dt( :class='b("spec-term")') {{ col.label }}
+        dd( :class='b("spec-desc")') {{ getData(block, col.field, col.meta) }}
   div(:class='b()' v-else)
     span Reload
 
@@ -65,6 +69,10 @@ export default class extends Vue {
   @Prop() dataset: any[];
 
   show = true;
+
+  get isArray() {
+    return Array.isArray(this.dataset);
+  }
 
   getData(from: any, key: string, meta: { func: (row: any) => any }) {
     if (key === "meta.function") {
