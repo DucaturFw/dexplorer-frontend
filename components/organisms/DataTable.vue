@@ -13,10 +13,13 @@
           router-link(v-if='col.meta.url' :to='"/" + selectedChain +  col.meta.url(props.row)')
             component(:is='col.meta.editor' v-bind='col.meta.props' :value='getData(props.row, col.field, col.meta)' :class='b("field", col.meta )')
           component(v-else :is='col.meta.editor' v-bind='col.meta.props' :value='getData(props.row, col.field, col.meta)' :class='b("field", col.meta )')
-    div(:class='b("list")')
+    div(:class='b("list")' v-else)
       dl(v-for="(col, index) in columns" :key='index' :class='b("spec")')
         dt( :class='b("spec-term")') {{ col.label }}
-        dd( :class='b("spec-desc")') {{ getData(block, col.field, col.meta) }}
+        dd( :class='b("spec-desc")')
+          router-link(v-if='col.meta.url' :to='"/" + selectedChain +  col.meta.url(dataset)')
+            component(:is='col.meta.editor' v-bind='col.meta.props' :value='getData(dataset, col.field, col.meta)' :class='b("field", col.meta )')
+          component(v-else :is='col.meta.editor' v-bind='col.meta.props' :value='getData(dataset, col.field, col.meta)' :class='b("field", col.meta )')
   div(:class='b()' v-else)
     span Reload
 
@@ -25,12 +28,13 @@
 <script lang="ts">
 import vue from "vue";
 import { Vue, Component, Prop, Watch } from "nuxt-property-decorator";
+import { State } from "vuex-class";
 import HashVue from "../moleculas/data-table-fields/Hash.vue";
 import FromNowVue from "../moleculas/data-table-fields/FromNow.vue";
 import DateVue from "../moleculas/data-table-fields/Date.vue";
 import TextVue from "../moleculas/data-table-fields/Text.vue";
 import ValueVue from "../moleculas/data-table-fields/Value.vue";
-import { State } from "vuex-class";
+import MoneyVue from "../moleculas/data-table-fields/Money.vue";
 
 export interface ITableColumn {
   title: string;
@@ -51,7 +55,8 @@ export interface ITableColumn {
     "dt-fromNow": FromNowVue,
     "dt-date": DateVue,
     "dt-text": TextVue,
-    "dt-value": ValueVue
+    "dt-value": ValueVue,
+    "dt-money": MoneyVue
   },
   watch: {
     schema: function(v) {
@@ -132,6 +137,27 @@ export default class extends Vue {
   &__header {
     &--custom {
       background-color: rgba(41, 125, 251, 0.05);
+    }
+  }
+
+  &__spec {
+    display: flex;
+    padding: 5px 10px;
+    border-bottom: 1px solid #dbdbdb;
+
+    &:nth-child(1) {
+      border-top: 1px solid #dbdbdb;
+    }
+
+    &-term {
+      white-space: nowrap;
+      margin-right: auto;
+    }
+
+    &-desc {
+      text-overflow: ellipsis;
+      overflow: hidden;
+      margin-left: 20px;
     }
   }
 }
