@@ -26,7 +26,7 @@ export default class extends Vue {
   }
 
   get number() {
-    return parseFloat(this.raw);
+    return parseFloat(this.raw || "0");
   }
 
   get decimal() {
@@ -41,5 +41,7 @@ export default class extends Vue {
 
 <style lang="scss">
 .o-value {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.035em;
 }
 </style>
