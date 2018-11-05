@@ -191,21 +191,23 @@ export class DuxiConnection {
 
   tick: number = 0;
 
-  getBlockByHash(hash: number) {
-    return ethrpc("eth_getBlockByHash", ["0x" + hash, true]).then(response => ({
-      ...response.data.result,
-      height: ethNum(response.data.result.number),
-      timestamp: ethNum(response.data.result.timestamp),
-      size: ethNum(response.data.result.size),
-      gasUsed: ethNum(response.data.result.gasUsed),
-      gasLimit: ethNum(response.data.result.gasLimit)
-    }));
+  getBlockByHash(hash: number, transactions: boolean = false) {
+    return ethrpc("eth_getBlockByHash", ["0x" + hash, transactions]).then(
+      response => ({
+        ...response.data.result,
+        height: ethNum(response.data.result.number),
+        timestamp: ethNum(response.data.result.timestamp),
+        size: ethNum(response.data.result.size),
+        gasUsed: ethNum(response.data.result.gasUsed),
+        gasLimit: ethNum(response.data.result.gasLimit)
+      })
+    );
   }
 
-  getBlockByHeight(height: number) {
+  getBlockByHeight(height: number, transactions: boolean = false) {
     return ethrpc("eth_getBlockByNumber", [
       "0x" + new bn(height).toString("hex"),
-      true
+      transactions
     ]).then(response => ({
       ...response.data.result,
       height: ethNum(response.data.result.number),
