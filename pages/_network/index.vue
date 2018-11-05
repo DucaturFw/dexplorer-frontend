@@ -6,14 +6,6 @@
 
       b-field(v-for='(col, index) in columns')
         b-checkbox(:value="col.show" @input='flag => toggleShow(index, flag)') {{ col.title }}
-
-      //- b-field(v-for='col in defaultColumns')
-        b-checkbox(v-model="col.show") {{ col.title }}
-
-
-      //- b-field(v-for='col in customColumns')
-        b-checkbox(v-model="col.show") {{ col.title }}
-      pre {{ latestBlocks[0] }}
 </template>
 
 <script lang="ts">
@@ -84,7 +76,8 @@ export default class extends Vue {
     },
     {
       title: "Tx Count",
-      key: row => row.transactions.length,
+      key: row =>
+        Array.isArray(row.transactions) ? row.transactions.length : 0,
       width: 65
     },
     {
