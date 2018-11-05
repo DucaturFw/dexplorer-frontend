@@ -10,7 +10,9 @@
       </template>
       template(slot-scope="props")
         b-table-column(v-for='col in columns' v-bind='col' :key='col.label+col.field' :class='b("column", col.meta)')
-          component(:is='col.meta.editor' v-bind='col.meta.props' :value='getData(props.row, col.field, col.meta)' :class='b("field", col.meta )')
+          router-link(v-if='col.meta.url' :to='"/" + selectedChain +  col.meta.url(props.row)')
+            component(:is='col.meta.editor' v-bind='col.meta.props' :value='getData(props.row, col.field, col.meta)' :class='b("field", col.meta )')
+          component(v-else :is='col.meta.editor' v-bind='col.meta.props' :value='getData(props.row, col.field, col.meta)' :class='b("field", col.meta )')
   div(:class='b()' v-else)
     span Reload
 
@@ -24,6 +26,7 @@ import FromNowVue from "../moleculas/data-table-fields/FromNow.vue";
 import DateVue from "../moleculas/data-table-fields/Date.vue";
 import TextVue from "../moleculas/data-table-fields/Text.vue";
 import ValueVue from "../moleculas/data-table-fields/Value.vue";
+import { State } from "vuex-class";
 
 export interface ITableColumn {
   title: string;
@@ -34,6 +37,7 @@ export interface ITableColumn {
   width?: number;
   hideMobile?: true;
   custom?: true;
+  url?: ((row: any) => any);
 }
 
 @Component({
@@ -49,23 +53,18 @@ export interface ITableColumn {
     schema: function(v) {
       this.show = false;
       this.$nextTick(() => (this.show = true));
-      // console.log(v.map(v => v.title).join(", "));
-      // this.$forceUpdate();
     }
   }
 })
 export default class extends Vue {
+  @State selectedChain: string;
+
   @Prop({ required: true })
   schema: ITableColumn[];
 
   @Prop() dataset: any[];
 
   show = true;
-  // @Watch("schema")
-  // onUpdateSchema() {
-  //   console.log(this.schema);
-  //   this.$forceUpdate();
-  // }
 
   getData(from: any, key: string, meta: { func: (row: any) => any }) {
     if (key === "meta.function") {
@@ -81,6 +80,8 @@ export default class extends Vue {
       label: col.title,
       width: col.width || 250,
       meta: {
+        col: col,
+        url: col.url,
         "hide-mobile": col.hideMobile,
         func: typeof col.key === "function" ? col.key : false,
         custom: col.custom,
@@ -122,7 +123,7 @@ export default class extends Vue {
   &__column,
   &__header {
     &--custom {
-      background-color: fade-out(#2f2bad, 0.95);
+      background-color: rgba(41, 125, 251, 0.05);
     }
   }
 }
