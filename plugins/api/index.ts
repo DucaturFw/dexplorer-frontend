@@ -1,11 +1,16 @@
+import vue from "vue";
 import bn from "bn.js";
 import * as rx from "rxjs";
 import axios, { AxiosPromise } from "axios";
 import { IBlock } from "~/store";
 
 export default function(context, inject) {
-  if ((<any>process).client && !context.isHMR) {
-    inject("connection", new DuxiConnection());
+  if (!context.isHMR) {
+    context.app.$connection = new DuxiConnection();
+    vue.prototype.$connection = context.app.$connection;
+
+    console.log("start connection loop");
+    context.app.$connection.loop();
   }
 }
 
@@ -183,15 +188,38 @@ export class DuxiConnection {
 
   tick: number = 0;
 
-  constructor() {
-    this.loop();
+  getBlockByHash(hash: number) {
+    return ethrpc("eth_getBlockByHash", ["0x" + hash, true]).then(response => ({
+      ...response.data.result,
+      height: ethNum(response.data.result.number),
+      timestamp: ethNum(response.data.result.timestamp),
+      size: ethNum(response.data.result.size),
+      gasUsed: ethNum(response.data.result.gasUsed),
+      gasLimit: ethNum(response.data.result.gasLimit)
+    }));
+  }
+
+  getBlockByHeight(height: number) {
+    return ethrpc("eth_getBlockByNumber", [
+      "0x" + new bn(height).toString("hex"),
+      true
+    ]).then(response => ({
+      ...response.data.result,
+      height: ethNum(response.data.result.number),
+      timestamp: ethNum(response.data.result.timestamp),
+      size: ethNum(response.data.result.size),
+      gasUsed: ethNum(response.data.result.gasUsed),
+      gasLimit: ethNum(response.data.result.gasLimit)
+    }));
   }
 
   async loop(force?: true) {
     if (!force) {
-      return setTimeout(() => this.loop(true), 500);
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
+
     console.log(`Loop ${this.tick++}`);
+
     if (this.chain !== null) {
       const height = await this.providers[this.chain].getHeight();
 
@@ -212,6 +240,8 @@ export class DuxiConnection {
           this.price.next(market.price);
         }
       }
+    } else {
+      console.log("select chain firstly");
     }
 
     this.loop();
