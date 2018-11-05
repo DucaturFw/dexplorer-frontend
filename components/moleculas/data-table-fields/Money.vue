@@ -2,7 +2,7 @@
   span(:class='b()')
     slot(name='prefix')
       span(:class='b("prefix")' v-if='prefix') {{ prefix }}
-    m-value(:class='b()' :delimiter='delimiter' :decimals='decimals') {{ raw }}
+    m-value(:class='b()' :delimiter='delimiter' :decimals='decimals' :value='raw')
     slot(name='suffix')
       span(:class='b("suffix")' v-if='suffix') {{ suffix }}
 </template>
