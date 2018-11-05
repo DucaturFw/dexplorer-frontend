@@ -4,7 +4,9 @@ $radius-small: 10px;
 $radius: 10px;
 $radius-large: 0;
 
-$primary: #f71568;
+$notification-radius: 0;
+
+$primary: #297dfb; //#ff42bc; // #f71568;
 $primary-invert: findColorInvert($primary);
 
 $dark: #2f2bad;
