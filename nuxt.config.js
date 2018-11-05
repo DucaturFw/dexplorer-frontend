@@ -27,7 +27,8 @@ module.exports = {
     baseUrl: process.env.BASE_URL || `http://${host}:${port}`
   },
   plugins: [
-    { src: "~/plugins/api", ssr: true },
+    { src: "~/plugins/api" },
+    { src: "~/plugins/time.plugin.ts", ssr: true },
     { src: "~/plugins/async-computed.plugin.ts" },
     { src: "~/plugins/bem.plugin.ts" },
     { src: "~/plugins/buefy.plugin.ts" },
@@ -54,6 +55,9 @@ module.exports = {
         href: "/favicon.ico"
       }
     ]
+  },
+  router: {
+    middleware: "network"
   },
   /*
   ** Customize the progress-bar color
