@@ -14,27 +14,34 @@
           no-ssr
             line-chart(:data='tpsChartData' :options='tpsChartOptions' style='position: absolute; left: 0; top: 0; bottom: 0; right: 0;z-index: 1')
           .card-content(style="z-index: 2; position: relative")
-            p.title 250/4992
+            p.title
+              m-value 250
+              span /
+              m-value 4992
             p.subtitle current/max tps
         .card.o-flex__item.o-flex__item--grow
           .card-content
-            p.title {{chainHeight}}
+            p.title 
+              m-value(:value='chainHeight')
             p.subtitle head block
         .card.o-flex__item.o-flex__item--grow
           no-ssr
             line-chart(:data='tpsChartData' :options='tpsChartOptions' style='position: absolute; left: 0; top: 0; bottom: 0; right: 0;z-index: 1')
           .card-content(style="z-index: 2; position: relative")
-            p.title ${{price}}
+            p.title
+              m-money(prefix='$' :decimals='2' :value='price')
             p.subtitle avg. price
         .card.o-flex__item.o-flex__item--grow
           no-ssr
             line-chart(:data='tpsChartData' :options='tpsChartOptions' style='position: absolute; left: 0; top: 0; bottom: 0; right: 0;z-index: 1')
           .card-content(style="z-index: 2; position: relative")
-            p.title 4 132
+            p.title 
+              m-value(:value='mempool')
             p.subtitle mempool size
         .card.o-flex__item.o-flex__item--grow
           .card-content
-            p.title ${{marketCap}}
+            p.title
+              m-money(prefix='$' suffix=' MM' :decimals='2' delimiter=',' :value='marketCapMln')
             p.subtitle market cap
         div(style="padding: 20px")
           a.button.is-large.is-rounded.is-icon.is-success.is-inverted.is-outlined
@@ -65,6 +72,8 @@ import Menu from "~/components/organisms/Menu.vue";
 import Search from "~/components/organisms/Search.vue";
 import Flex from "~/components/organisms/Flex.vue";
 import LineChart from "~/components/organisms/LineChart.vue";
+import MoneyVue from "~/components/moleculas/data-table-fields/Money.vue";
+import ValueVue from "~/components/moleculas/data-table-fields/Value.vue";
 import { Component, Vue, Watch } from "nuxt-property-decorator";
 import { Mutation, State, Action } from "vuex-class";
 import {
@@ -73,6 +82,7 @@ import {
   IChainConfig,
   ChainCode
 } from "~/store";
+import { setInterval } from "timers";
 
 @Component({
   name: "default-layout",
@@ -85,8 +95,15 @@ import {
     "o-search": Search,
     "o-flex": Flex,
     "o-chain-select": ChainSelect,
-    "m-logotype": Logotype
+    "m-logotype": Logotype,
+    "m-money": MoneyVue,
+    "m-value": ValueVue
   }
+  // watch: {
+  //   chainHeight() {
+
+  //   }
+  // }
 })
 export default class extends Vue {
   @State chains: Array<IChainConfig>;
@@ -95,7 +112,24 @@ export default class extends Vue {
   @State price: number;
   @State marketCap: number;
 
+  mempool: number = Math.floor(Math.random() * 4300);
+
   @Action("selectedChain") onSelectedChain: CommitMutation<ChainCode>;
+
+  get marketCapMln() {
+    return this.marketCap / 1e6;
+  }
+
+  mounted() {
+    setInterval(this.updateMemPool.bind(this), 250);
+  }
+
+  updateMemPool() {
+    this.mempool = Math.max(
+      0,
+      this.mempool + (-100 + Math.floor(Math.random() * 200))
+    );
+  }
 
   get tpsChartData() {
     return {

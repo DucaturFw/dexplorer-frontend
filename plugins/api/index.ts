@@ -57,6 +57,10 @@ function cmc(id) {
   return proxy.get("https://api.coinmarketcap.com/v2/ticker/" + id);
 }
 
+function ethNum(raw) {
+  return new bn(raw.slice(2), 16).toNumber();
+}
+
 async function cmcMarket(id) {
   const response = await cmc(id);
   try {
@@ -118,14 +122,11 @@ export class DuxiConnection {
                 true
               ]).then(response => ({
                 ...response.data.result,
-                height: new bn(
-                  response.data.result.number.slice(2),
-                  16
-                ).toNumber(),
-                timestamp: new bn(
-                  response.data.result.timestamp.slice(2),
-                  16
-                ).toNumber()
+                height: ethNum(response.data.result.number),
+                timestamp: ethNum(response.data.result.timestamp),
+                size: ethNum(response.data.result.size),
+                gasUsed: ethNum(response.data.result.gasUsed),
+                gasLimit: ethNum(response.data.result.gasLimit)
               }))
             )
         );
