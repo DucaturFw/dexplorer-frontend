@@ -1,5 +1,5 @@
 <template lang="pug">
-  b-dropdown(:value='value' @change='v => $emit("input", v)' :class="b()")
+  b-dropdown(:value='value' @change='v => $router.push("/" + v)' :class="b()")
     m-chain-badge(slot='trigger' :class="b('selected')" :icon='selectedChain.icon' :name='selectedChain.name' :ticker='selectedChain.ticker')
     b-dropdown-item(v-for='chain in chains' :value='chain.code')
       span {{chain.name }}
