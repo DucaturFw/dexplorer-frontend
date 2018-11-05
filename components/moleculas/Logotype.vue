@@ -1,5 +1,5 @@
 <template lang="pug">
-  h1.is-size-3(:class='b()') Dexplorer
+  h1.is-size-3(:class='b()') Duxi
 </template>
 
 <script lang="ts">
