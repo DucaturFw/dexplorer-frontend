@@ -5,11 +5,11 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from "nuxt-property-decorator";
-import {
-  distanceInWordsToNow,
-  distanceInWords,
-  distanceInWordsStrict
-} from "date-fns";
+// import {
+//   distanceInWordsToNow,
+//   distanceInWords,
+//   distanceInWordsStrict
+// } from "date-fns";
 import { setInterval } from "timers";
 
 @Component({
@@ -49,9 +49,17 @@ export default class extends Vue {
   }
 
   get distance() {
-    return distanceInWordsStrict(this.time, this.now, {
-      unit: "s"
-    });
+    const a = Math.floor((this.now - this.time) / 1000);
+
+    if (0 == a) return "0 s";
+    const c = 60,
+      d = 0,
+      e = ["sec", "min", "hours"],
+      f = Math.floor(Math.log(a) / Math.log(c));
+    return parseFloat((a / Math.pow(c, f)).toFixed(d)) + " " + e[f];
+    // return distanceInWordsStrict(this.time, this.now, {
+    //   unit: "s"
+    // });
     // return distanceInWords(this.time, this.now, {
     //   includeSeconds: true
     //   // addSuffix: true
