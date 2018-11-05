@@ -30,6 +30,16 @@ export default class extends Vue {
   $connection: DuxiConnection;
   subscriptions: Subscription[] = [];
 
+  async start() {
+    while (true) {
+      try {
+        await this.$connection.loop();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
+
   @Watch("selectedChain")
   changeChain(chain: ChainCode) {
     this.$connection.watch(chain);
@@ -41,6 +51,7 @@ export default class extends Vue {
   }
 
   mounted() {
+    this.$connection.watch(this.selectedChain);
     console.log("subscribe on updates");
     this.subscriptions = [
       this.$connection.height.subscribe(this.chainHeightChange),
@@ -49,9 +60,7 @@ export default class extends Vue {
       this.$connection.blocks.subscribe(this.recentBlockReceive)
     ];
 
-    if (!this.selectedChain) {
-      this.selectedChainChange(this.chains[0].code);
-    }
+    // this.start();
   }
 }
 </script>
