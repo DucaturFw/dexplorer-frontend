@@ -11,30 +11,20 @@ import { Component, Vue, Prop } from "nuxt-property-decorator";
 //   distanceInWordsStrict
 // } from "date-fns";
 import { setInterval } from "timers";
+import { State } from "vuex-class";
 
 @Component({
   name: "o-from-now"
 })
 export default class extends Vue {
+  @State now: number;
+
   @Prop() value: string;
 
   @Prop({ default: true })
   seconds: boolean;
 
-  now: number = new Date().getTime();
   interval: any = null;
-
-  mounted() {
-    this.interval = setInterval(this.updateTime.bind(this), 1000);
-  }
-
-  beforeDestroy() {
-    clearInterval(this.interval);
-  }
-
-  updateTime() {
-    this.now = new Date().getTime();
-  }
 
   get raw() {
     if (this.$slots.default && this.$slots.default.length) {
