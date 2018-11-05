@@ -1,6 +1,6 @@
 <template lang="pug">
   section(:class="b()")
-    .tile.is-vertical
+    .tile.is-vertical(v-if='block')
       .tile
         t-container.tile.is-child.has-background-black-ter.has-text-white-bis(:padding='30')
           h2.is-size-1 Block \#{{ block.height}}
@@ -10,6 +10,10 @@
       .tile
         t-container.tile.is-child(:padding='30')
           h3.is-size-3 Core
+
+          dl(v-for="(line, index) in details" :key='index' :class='b("spec")')
+            dt( :class='b("spec-term")') {{ line.title }}
+            dd( :class='b("spec-desc")') {{ block[line.key] }}
         t-container.tile.is-child.has-background-white-ter(:padding='30')
           h3.is-size-3 Ethereum specific
       t-container.tile.is-child.has-background-white-ter(:padding='30')
@@ -33,14 +37,11 @@ import HashVue from "~/components/moleculas/data-table-fields/Hash.vue";
     "m-hash": HashVue
   },
   async asyncData(context) {
-    console.log(Object.keys(context));
-    // return {};
     let hash = "";
     let height = -1;
     let block: IBlock | null = null;
     const key = context.route.params.key;
 
-    // 0xe7acaa06d6ea7503af596c2af1639164de3ca2c93e4a7fc4a1350d1e86a6b222
     if (
       typeof key === "string" &&
       (key.length === 64 || key.startsWith("0x"))
@@ -54,8 +55,6 @@ import HashVue from "~/components/moleculas/data-table-fields/Hash.vue";
     } else {
       throw new Error("incorrect block identity");
     }
-
-    console.log(block);
 
     return {
       block,
@@ -82,5 +81,105 @@ export default class extends Vue {
   get isHeight() {
     return this.height > 0;
   }
+
+  get details() {
+    return [
+      {
+        title: "Height",
+        key: "height",
+        editor: "value",
+        width: 100
+      },
+      {
+        title: "Hash",
+        key: "hash",
+        editor: "hash",
+        props: {
+          head: 2,
+          tail: 4
+        },
+        width: 120
+      },
+      {
+        title: "Author",
+        key: "author",
+        editor: "hash",
+        props: {
+          head: 2,
+          tail: 4
+        },
+        width: 120
+      },
+      {
+        title: "Time",
+        key: "timestamp",
+        editor: "date",
+        props: {
+          format: "DD MMM GGGG HH:mm:ss"
+        },
+        width: 180
+      },
+      {
+        title: "Age",
+        key: "timestamp",
+        editor: "fromNow",
+        width: 65
+      },
+      {
+        title: "Tx Count",
+        key: row => row.transactions.length,
+        width: 65
+      },
+      {
+        title: "Size",
+        key: "size",
+        width: 200,
+        show: false
+      },
+      {
+        title: "Gas Used",
+        key: "gasUsed",
+        editor: "value",
+        custom: true
+      },
+      {
+        title: "Gas Limit",
+        key: "gasLimit",
+        editor: "value",
+        custom: true
+      },
+      {
+        title: "Log (map)",
+        key: "logsBloom",
+        editor: "hash",
+        custom: true,
+        hideMobile: true,
+        props: {
+          head: 0,
+          tail: 0
+        }
+      }
+    ];
+  }
 }
 </script>
+
+<style lang="scss">
+.l-page {
+  &__spec {
+    display: flex;
+
+    &-term {
+      white-space: nowrap;
+      margin-right: auto;
+    }
+
+    &-desc {
+      text-overflow: ellipsis;
+      overflow: hidden;
+      margin-left: 20px;
+    }
+  }
+}
+</style>
+
