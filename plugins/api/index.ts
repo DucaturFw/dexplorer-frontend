@@ -9,8 +9,6 @@ export default function(context, inject) {
     context.app.$connection = new DuxiConnection();
     vue.prototype.$connection = context.app.$connection;
 
-    console.log("start connection loop");
-
     if ((<any>process).client) {
       context.app.$connection.loop();
     }
@@ -245,15 +243,12 @@ export class DuxiConnection {
           this.price.next(market.price);
         }
       }
-    } else {
-      console.log("select chain firstly");
     }
 
     this.loop();
   }
 
   watch(chain: ChainCode) {
-    console.log(`Watch ${chain} network`);
     this.height.next(0);
     this.chain = chain;
     this.reject = true;
