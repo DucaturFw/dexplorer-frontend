@@ -2,7 +2,6 @@
   section(:class="b()")
     div(v-if='latestBlocks && latestBlocks.length')
       o-data-table(:dataset='latestBlocks' :schema='showColumns')
-      //- b-table(:data='latestBlocks' :columns='columns')
 
       b-field(v-for='(col, index) in columns')
         b-checkbox(:value="col.show" @input='flag => toggleShow(index, flag)') {{ col.title }}
