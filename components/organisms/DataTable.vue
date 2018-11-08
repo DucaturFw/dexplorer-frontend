@@ -1,25 +1,26 @@
 <template lang="pug">
   div(:class='b()' v-if='show')
-    b-table(:class='b("table")' :data='dataset' v-if='isArray')
-      <template slot-scope="props" slot="header">
+    b-table(v-if='isArray(dataset)' :class='b("table")' :data='dataset')
+      template(slot-scope="props" slot="header")
         span(:class='b("header", props.column.meta)') {{ props.column.label }}
-        
-        //- <b-tooltip :active="!!props.column.meta" :label="props.column.meta" dashed>
-        //-     {{ props.column.label }}
-        //- </b-tooltip>
-      </template>
       template(slot-scope="props")
         b-table-column(v-for='col in columns' v-bind='col' :key='col.label+col.field' :class='b("column", col.meta)')
-          router-link(v-if='col.meta.url' :to='"/" + selectedChain +  col.meta.url(props.row)')
-            component(:is='col.meta.editor' v-bind='col.meta.props' :value='getData(props.row, col.field, col.meta)' :class='b("field", col.meta )')
-          component(v-else :is='col.meta.editor' v-bind='col.meta.props' :value='getData(props.row, col.field, col.meta)' :class='b("field", col.meta )')
+          div(v-if='!isArray(getData(props.row, col.field, col.meta))')
+            router-link(v-if='col.meta.url' :to='"/" + selectedChain +  col.meta.url(props.row)')
+              component(:is='col.meta.editor' v-bind='col.meta.props' :value='getData(props.row, col.field, col.meta)' :class='b("field", col.meta )')
+            component(v-else :is='col.meta.editor' v-bind='col.meta.props' :value='getData(props.row, col.field, col.meta)' :class='b("field", col.meta )')
+          div(v-for='l in getData(props.row, col.field, col.meta)' v-else)
+            component(:is='col.meta.editor' v-bind='col.meta.props' :value='l' :class='b("field", col.meta )')
     div(:class='b("list")' v-else)
       dl(v-for="(col, index) in columns" :key='index' :class='b("spec")')
-        dt( :class='b("spec-term")') {{ col.label }}
-        dd( :class='b("spec-desc")')
-          router-link(v-if='col.meta.url' :to='"/" + selectedChain +  col.meta.url(dataset)')
-            component(:is='col.meta.editor' v-bind='col.meta.props' :value='getData(dataset, col.field, col.meta)' :class='b("field", col.meta )')
-          component(v-else :is='col.meta.editor' v-bind='col.meta.props' :value='getData(dataset, col.field, col.meta)' :class='b("field", col.meta )')
+        dt(:class='b("spec-term")') {{ col.label }}
+        dd(:class='b("spec-desc")')
+          div(v-if='!isArray(getData(dataset, col.field, col.meta))')
+            router-link(v-if='col.meta.url' :to='"/" + selectedChain +  col.meta.url(dataset)')
+              component(:is='col.meta.editor' v-bind='col.meta.props' :value='getData(dataset, col.field, col.meta)' :class='b("field", col.meta )')
+            component(v-else :is='col.meta.editor' v-bind='col.meta.props' :value='getData(dataset, col.field, col.meta)' :class='b("field", col.meta )')
+          div(v-for='l in getData(dataset, col.field, col.meta)' v-else)
+            component(:is='col.meta.editor' v-bind='col.meta.props' :value='l' :class='b("field", col.meta )')
   div(:class='b()' v-else)
     span Reload
 
@@ -75,8 +76,8 @@ export default class extends Vue {
 
   show = true;
 
-  get isArray() {
-    return Array.isArray(this.dataset);
+  isArray(raw: any) {
+    return Array.isArray(raw);
   }
 
   getData(from: any, key: string, meta: { func: (row: any) => any }) {
@@ -124,7 +125,7 @@ export default class extends Vue {
     margin: -0.5em -0.75em;
   }
   &__column {
-    white-space: nowrap;
+    // white-space: nowrap;
 
     &--hide-mobile {
       @media screen and (max-width: 768px) {

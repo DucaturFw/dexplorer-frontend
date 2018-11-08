@@ -1,9 +1,11 @@
 <template lang="pug">
   span(:class='b()')
     b-tooltip(placement="is-top" type='is-light' :label="hex")
-      span(:class="b('wrapper')")
+      p(:class="b('wrapper')")
         span(:class='b("head")' v-if='head') {{ extractedHead }}
-        span(:class='b("part")' v-for="part in parts" :style="{ color: `#${part}` }")
+        template(v-for="(part, index) in parts" )
+          br(v-if="row > 0 && index > 0 && index % row === 0")
+          span(:class='b("part")' :style="{ color: `#${part}` }") █
         span(:class='b("tail")' v-if='tail') {{ extractedTail }}
 </template>
 
@@ -15,7 +17,11 @@ import { Component, Vue, Prop } from "nuxt-property-decorator";
   name: "o-hash"
 })
 export default class extends Vue {
-  @Prop() value: string;
+  @Prop({ default: "" })
+  value: string;
+
+  @Prop({ default: 0 })
+  row: number;
 
   @Prop({ default: 0 })
   head: number;
@@ -31,7 +37,7 @@ export default class extends Vue {
   }
 
   get hex() {
-    return this.raw;
+    return typeof this.raw === "string" ? this.raw : "";
   }
 
   get extractedHead() {
@@ -65,8 +71,10 @@ export default class extends Vue {
   letter-spacing: 0;
   &__wrapper {
     font-family: monospace;
-    line-height: 1em;
-    display: flex;
+    line-height: 0.81em;
+    letter-spacing: -0.05em;
+    white-space: nowrap;
+    word-wrap: none;
   }
   &__tail {
     font-size: 90%;
@@ -76,11 +84,11 @@ export default class extends Vue {
     font-size: 90%;
     margin-right: 0.1em;
   }
-  &__part {
-    line-height: 1em;
-    &::before {
-      content: "█";
-    }
-  }
+  // &__part {
+  //   line-height: 1em;
+  //   // &::before {
+  //   // content: "█";
+  //   // }
+  // }
 }
 </style>

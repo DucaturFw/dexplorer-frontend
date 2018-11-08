@@ -61,8 +61,6 @@ import bn from "bn.js";
       throw new Error("incorrect block identity");
     }
 
-    console.log(block);
-
     return {
       block,
       hash,
@@ -201,7 +199,8 @@ export default class extends Vue {
       {
         title: "Hash",
         key: "hash",
-        editor: "hash"
+        editor: "hash",
+        url: row => `/tx/${row.hash}`
       },
       {
         title: "Value",

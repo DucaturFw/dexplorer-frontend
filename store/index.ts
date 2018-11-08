@@ -216,8 +216,5 @@ export class actions {
   static async recentBlockReceive({ commit }, block) {
     commit("recentBlockReceive", block);
   }
-  static async nuxtServerInit({ commit }, { app }) {
-    const people = await app.$axios.$get("./random-data.json");
-    commit("setPeople", people.slice(0, 10));
-  }
+  static async nuxtServerInit({ commit }, { app }) {}
 }

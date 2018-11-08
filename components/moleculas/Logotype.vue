@@ -14,5 +14,10 @@ export default class extends Vue {}
 <style lang="scss">
 .m-logotype {
   text-transform: uppercase;
+  color: white;
+
+  &:hover {
+    color: fade-out(white, 0.2);
+  }
 }
 </style>

@@ -45,22 +45,28 @@ const proxy = {
 };
 
 function jsonrpc(url, method, params) {
-  return proxy.post(url, {
-    jsonrpc: "2.0",
-    method: method,
-    params: params,
-    id: 1
-  });
+  return proxy
+    .post(url, {
+      jsonrpc: "2.0",
+      method: method,
+      params: params,
+      id: 1
+    })
+    .then(r => r.data.result);
 }
 
 function ethrpc(method, params) {
   return jsonrpc("http://95.216.68.220:8545", method, params);
 }
 function eosrpc(method, params) {
-  return proxy.post("http://95.216.68.220:8888/v1/" + method, params);
+  return proxy
+    .post("http://95.216.68.220:8888/v1/" + method, params)
+    .then(r => r.data);
 }
 function cmc(id) {
-  return proxy.get("https://api.coinmarketcap.com/v2/ticker/" + id);
+  return proxy
+    .get("https://api.coinmarketcap.com/v2/ticker/" + id)
+    .then(r => r.data);
 }
 
 function ethNum(raw) {
@@ -71,8 +77,8 @@ async function cmcMarket(id) {
   const response = await cmc(id);
   try {
     return {
-      price: response.data.data.quotes.USD.price,
-      cap: response.data.data.quotes.USD.market_cap
+      price: response.data.quotes.USD.price,
+      cap: response.data.quotes.USD.market_cap
     };
   } catch (e) {
     console.error(e);
@@ -103,7 +109,7 @@ export class DuxiConnection {
               ethrpc("eth_getBlockByNumber", [
                 "0x" + new bn(height).toString("hex"),
                 true
-              ]).then(response => response.data.result)
+              ])
             )
         );
         return blocks;
@@ -111,8 +117,8 @@ export class DuxiConnection {
     },
     eth: {
       async getHeight() {
-        const response = await ethrpc("eth_blockNumber", []);
-        return new bn((response.data.result as string).slice(2), 16).toNumber();
+        const result = await ethrpc("eth_blockNumber", []);
+        return new bn((result as string).slice(2), 16).toNumber();
       },
       async getMarket() {
         return await cmcMarket(1027);
@@ -126,13 +132,13 @@ export class DuxiConnection {
               ethrpc("eth_getBlockByNumber", [
                 "0x" + new bn(height).toString("hex"),
                 true
-              ]).then(response => ({
-                ...response.data.result,
-                height: ethNum(response.data.result.number),
-                timestamp: ethNum(response.data.result.timestamp),
-                size: ethNum(response.data.result.size),
-                gasUsed: ethNum(response.data.result.gasUsed),
-                gasLimit: ethNum(response.data.result.gasLimit)
+              ]).then(result => ({
+                ...result,
+                height: ethNum(result.number),
+                timestamp: ethNum(result.timestamp),
+                size: ethNum(result.size),
+                gasUsed: ethNum(result.gasUsed),
+                gasLimit: ethNum(result.gasLimit)
               }))
             )
         );
@@ -142,7 +148,7 @@ export class DuxiConnection {
     eos: {
       async getHeight() {
         const response = await eosrpc("chain/get_info", null);
-        return response.data.head_block_num;
+        return response.head_block_num;
       },
       async getMarket() {
         return await cmcMarket(1765);
@@ -156,7 +162,7 @@ export class DuxiConnection {
               eosrpc("chain/get_block", {
                 block_num_or_id: height
               })
-                .then(response => response.data)
+                .then(response => response)
                 .then(block => ({
                   version: 1,
 
@@ -189,15 +195,15 @@ export class DuxiConnection {
 
   tick: number = 0;
 
-  getBlockByHash(hash: number, transactions: boolean = false) {
+  getBlockByHash(hash: string, transactions: boolean = false) {
     return ethrpc("eth_getBlockByHash", ["0x" + hash, transactions]).then(
-      response => ({
-        ...response.data.result,
-        height: ethNum(response.data.result.number),
-        timestamp: ethNum(response.data.result.timestamp),
-        size: ethNum(response.data.result.size),
-        gasUsed: ethNum(response.data.result.gasUsed),
-        gasLimit: ethNum(response.data.result.gasLimit)
+      block => ({
+        ...block,
+        height: ethNum(block.number),
+        timestamp: ethNum(block.timestamp),
+        size: ethNum(block.size),
+        gasUsed: ethNum(block.gasUsed),
+        gasLimit: ethNum(block.gasLimit)
       })
     );
   }
@@ -206,14 +212,110 @@ export class DuxiConnection {
     return ethrpc("eth_getBlockByNumber", [
       "0x" + new bn(height).toString("hex"),
       transactions
-    ]).then(response => ({
-      ...response.data.result,
-      height: ethNum(response.data.result.number),
-      timestamp: ethNum(response.data.result.timestamp),
-      size: ethNum(response.data.result.size),
-      gasUsed: ethNum(response.data.result.gasUsed),
-      gasLimit: ethNum(response.data.result.gasLimit)
+    ]).then(block => ({
+      ...block,
+      height: ethNum(block.number),
+      timestamp: ethNum(block.timestamp),
+      size: ethNum(block.size),
+      gasUsed: ethNum(block.gasUsed),
+      gasLimit: ethNum(block.gasLimit)
     }));
+  }
+
+  async getTransaction(hash: string) {
+    let [tx, receipt, trace] = await Promise.all([
+      ethrpc("eth_getTransactionByHash", ["0x" + hash]),
+      ethrpc("eth_getTransactionReceipt", ["0x" + hash]),
+      ethrpc("trace_transaction", ["0x" + hash])
+    ]);
+
+    let block = await this.getBlockByHash(tx.blockHash.slice(2));
+
+    const getInput = (r: any): string => {
+      switch (r.type) {
+        case "call":
+          return r.action.input;
+        case "create":
+          return r.action.init;
+        case "suicide":
+          return "0x0";
+      }
+      throw new Error(`unknown trace type ${r.type}`);
+    };
+    const getTo = (r: any, tx?: any): string[] => {
+      switch (r.type) {
+        case "call":
+          return [r.action.to];
+        case "suicide":
+          return [r.action.refundAddress];
+        case "create":
+          return ["0x0"];
+      }
+      throw new Error(`unknown trace type ${r.type}`);
+    };
+    const getFrom = (r: any): string[] => {
+      switch (r.type) {
+        case "call":
+        case "create":
+          return [r.action.from];
+        case "suicide":
+          return [r.action.address];
+      }
+      throw new Error(`unknown trace type ${r.type}`);
+    };
+    const getValue = (r: any): string => {
+      try {
+        return new bn(r.action.value.slice(2), "hex").toString(10);
+      } catch (e) {
+        return "0";
+      }
+    };
+
+    trace = trace.map(r => ({
+      raw: {
+        ...r,
+        block: null
+      },
+      meta: {},
+      version: 2,
+      from: getFrom(r),
+      to: getTo(r),
+      input: getInput(r),
+      timestamp: block.timestamp,
+      result: r.result || {},
+      type: r.type,
+      txHash: r.transactionHash,
+      trace: r.traceAddress,
+      parsed: {},
+      id: r.transactionHash + r.traceAddress,
+      blockHash: block.hash,
+      blockHeight: block.height,
+      value: getValue(r)
+    }));
+
+    const raw = {
+      ...tx,
+      ...receipt,
+      trace
+    };
+
+    raw.value = new bn(raw.value.slice(2), 16).toString(10);
+    raw.nonce = new bn(raw.nonce.slice(2), 16).toString(10);
+    raw.gas = new bn(raw.gas.slice(2), 16).toString(10);
+    raw.gasPrice = new bn(raw.gasPrice.slice(2), 16).toString(10);
+    raw.gasUsed = new bn(raw.gasUsed.slice(2), 16).toString(10);
+    raw.cumulativeGasUsed = new bn(raw.cumulativeGasUsed.slice(2), 16).toString(
+      10
+    );
+    raw.txIndex = new bn(raw.transactionIndex.slice(2), 16).toString(10);
+    raw.blockHeight = new bn(raw.blockNumber.slice(2), 16).toString(10);
+
+    delete raw.transactionIndex;
+    delete raw.blockNumber;
+
+    return {
+      ...raw
+    };
   }
 
   async loop(force?: true) {
